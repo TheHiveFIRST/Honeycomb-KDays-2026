@@ -8,8 +8,11 @@
 package frc.robot;
 
 import com.revrobotics.util.StatusLogger;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -97,7 +100,9 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    robotContainer.resetSimulationField();
+  }
 
   /** This function is called periodically when disabled. */
   @Override
@@ -139,6 +144,12 @@ public class Robot extends LoggedRobot {
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+    SimulatedArena.getInstance()
+        .addGamePieceProjectile(
+            ReefscapeCoralOnFly.DropFromCoralStation(
+                ReefscapeCoralOnFly.CoralStationsSide.LEFT_STATION,
+                DriverStation.Alliance.Red,
+                true)); // TODO: change to rebuilt
   }
 
   /** This function is called periodically during test mode. */
@@ -151,5 +162,8 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    SimulatedArena.getInstance().simulationPeriodic(); // TODO: DO NOT CALL WHEN RUNNING REAL ROBOT
+    robotContainer.updateSimulationToAdvantageScope();
+  }
 }

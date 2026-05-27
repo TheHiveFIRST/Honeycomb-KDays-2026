@@ -25,8 +25,10 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
+import frc.robot.util.sim.FuelSim;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnField;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -42,6 +44,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Vision vision;
   private SwerveDriveSimulation driveSimulation = null;
+  public static FuelSim fuelSim = new FuelSim("fuel");
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -96,6 +99,22 @@ public class RobotContainer {
                     camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose),
                 new VisionIOPhotonVisionSim(
                     camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose));
+
+        fuelSim.enableAirResistance();
+        fuelSim.start();
+
+        // fuelSim.registerRobot(
+        //     Constants.BUMPER_WIDTH,
+        //     Constants.BUMPER_WIDTH,
+        //     Inches.of(6),
+        //     () -> drive.getRobotPose(),
+        //     () -> drive.getFieldRelativeSpeeds()
+        // );
+
+        fuelSim.registerIntake(
+            Inches.of(15), Inches.of(22), Inches.of(-15), Inches.of(15), () -> true, () -> {});
+
+        fuelSim.spawnStartingFuel();
         break;
 
       default:
@@ -259,6 +278,7 @@ public class RobotContainer {
 
     driveSimulation.setSimulationWorldPose(new Pose2d(3, 3, new Rotation2d()));
     SimulatedArena.getInstance().resetFieldForAuto();
+    SimulatedArena.getInstance().addGamePiece(new RebuiltFuelOnField(new Translation2d(2, 3)));
   }
 
   public void updateSimulationToAdvantageScope() {
@@ -266,9 +286,10 @@ public class RobotContainer {
 
     Logger.recordOutput(
         "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
-    Logger.recordOutput(
-        "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
-    Logger.recordOutput(
-        "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+    Logger.recordOutput("ferry1", new Translation2d(2, 7));
+
+    // Logger.recordOutput("ferry2",new Translation2d(2,1));
+    // Logger.recordOutput("ferrydistance", turret.getDistanceToPoint(new Translation2d(2,7)));
+    // TODO: add shooter
   }
 }

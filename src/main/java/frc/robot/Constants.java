@@ -7,6 +7,10 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Inches;
+
+import edu.wpi.first.units.measure.Distance;
+
 // import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -32,4 +36,7 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+
+  public static final Distance BUMPER_WIDTH =
+      Inches.of(34); // robot is a square, so bumper width = bumper length
 }

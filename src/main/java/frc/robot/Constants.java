@@ -7,14 +7,20 @@
 
 package frc.robot;
 
+// import edu.wpi.first.wpilibj.RobotBase;
+
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
  * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
  * (log replay from a file).
  */
 public final class Constants {
-  public static final Mode simMode = Mode.SIM;
+  public static final Mode simMode = Mode.SIM; // CHANGE TO .REPLAY FOR FILE
   public static final Mode currentMode = Mode.SIM; // RobotBase.isReal() ? Mode.REAL : simMode;
+
+  // Controller settings
+  /** Set to true to use keyboard for simulator input instead of joystick */
+  public static final boolean USE_KEYBOARD_FOR_SIM = false;
 
   public static enum Mode {
     /** Running on a real robot. */

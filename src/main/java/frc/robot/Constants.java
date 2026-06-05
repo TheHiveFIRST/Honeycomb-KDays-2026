@@ -24,7 +24,7 @@ public final class Constants {
 
   // Controller settings
   /** Set to true to use keyboard for simulator input instead of joystick */
-  public static final boolean USE_KEYBOARD_FOR_SIM = false;
+  public static final boolean USE_KEYBOARD_FOR_SIM = true;
 
   public static enum Mode {
     /** Running on a real robot. */

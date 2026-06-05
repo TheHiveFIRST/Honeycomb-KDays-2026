@@ -13,6 +13,7 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -26,9 +27,9 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.sim.FuelSim;
+import frc.robot.util.sim.RobotBumpSim;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnField;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -45,6 +46,8 @@ public class RobotContainer {
   private final Vision vision;
   private SwerveDriveSimulation driveSimulation = null;
   public static FuelSim fuelSim = new FuelSim("fuel");
+  private RobotBumpSim robotBumpSim = new RobotBumpSim(DriveConstants.getModuleLocations());
+  ;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -103,13 +106,12 @@ public class RobotContainer {
         fuelSim.enableAirResistance();
         fuelSim.start();
 
-        // fuelSim.registerRobot(
-        //     Constants.BUMPER_WIDTH,
-        //     Constants.BUMPER_WIDTH,
-        //     Inches.of(6),
-        //     () -> drive.getRobotPose(),
-        //     () -> drive.getFieldRelativeSpeeds()
-        // );
+        fuelSim.registerRobot(
+            Constants.BUMPER_WIDTH,
+            Constants.BUMPER_WIDTH,
+            Inches.of(6),
+            () -> driveSimulation.getSimulatedDriveTrainPose(),
+            () -> driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative());
 
         fuelSim.registerIntake(
             Inches.of(15), Inches.of(22), Inches.of(-15), Inches.of(15), () -> true, () -> {});
@@ -172,7 +174,10 @@ public class RobotContainer {
             drive,
             () -> useKeyboard ? keyboard.getRawAxis(1) : -controller.getLeftY(),
             () -> useKeyboard ? keyboard.getRawAxis(0) : -controller.getLeftX(),
-            () -> useKeyboard ? keyboard.getRawAxis(2) : -controller.getRightX()));
+            () ->
+                useKeyboard
+                    ? keyboard.getRawAxis(2)
+                    : -controller.getRightTriggerAxis())); // TODO: add real robot axis
 
     // Lock to 0° when A button is held
     controller
@@ -262,6 +267,9 @@ public class RobotContainer {
                                   MetersPerSecond.of(1.5),
                                   Degrees.of(-60)))));
     }
+
+    if (Constants.currentMode == Constants.Mode.SIM)
+      controller.x().whileTrue(Commands.runOnce(() -> fuelSim.clearFuel()));
   }
 
   /**
@@ -277,17 +285,31 @@ public class RobotContainer {
     if (Constants.currentMode != Constants.Mode.SIM) return;
 
     driveSimulation.setSimulationWorldPose(new Pose2d(3, 3, new Rotation2d()));
-    SimulatedArena.getInstance().resetFieldForAuto();
-    SimulatedArena.getInstance().addGamePiece(new RebuiltFuelOnField(new Translation2d(2, 3)));
+    // SimulatedArena.getInstance().resetFieldForAuto();
+    fuelSim.clearFuel();
+    fuelSim.spawnStartingFuel();
   }
 
   public void updateSimulationToAdvantageScope() {
     if (Constants.currentMode != Constants.Mode.SIM) return;
 
-    Logger.recordOutput(
-        "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
+    // Logger.recordOutput(
+    //     "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
     Logger.recordOutput("ferry1", new Translation2d(2, 7));
 
+    Pose3d simPose3d =
+        robotBumpSim.update(
+            driveSimulation.getSimulatedDriveTrainPose(),
+            driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+            5);
+
+    if (robotBumpSim.isOnRamp()) {
+      driveSimulation.setSimulationWorldPose(
+          robotBumpSim.getSimWorldPose(driveSimulation.getSimulatedDriveTrainPose()));
+    }
+    Logger.recordOutput("FieldSimulation/Pose3d", simPose3d);
+    // Logger.recordOutput(
+    //     "FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
     // Logger.recordOutput("ferry2",new Translation2d(2,1));
     // Logger.recordOutput("ferrydistance", turret.getDistanceToPoint(new Translation2d(2,7)));
     // TODO: add shooter

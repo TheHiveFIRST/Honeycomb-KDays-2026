@@ -151,7 +151,7 @@ public class Robot extends LoggedRobot {
     //         ReefscapeCoralOnFly.DropFromCoralStation(
     //             ReefscapeCoralOnFly.CoralStationsSide.LEFT_STATION,
     //             DriverStation.Alliance.Red,
-    //             true)); // TODO: change to rebuilt
+    //             true)); // TODO: change to rebuilt dropping fuel
   }
 
   /** This function is called periodically during test mode. */
@@ -166,6 +166,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void simulationPeriodic() {
     SimulatedArena.getInstance().simulationPeriodic(); // TODO: DO NOT CALL WHEN RUNNING REAL ROBOT
+    RobotContainer.fuelSim.updateSim();
     robotContainer.updateSimulationToAdvantageScope();
   }
 }

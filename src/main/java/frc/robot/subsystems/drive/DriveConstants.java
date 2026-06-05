@@ -92,7 +92,7 @@ public class DriveConstants {
   // Turn PID configuration
   public static final double turnKp = 2.0;
   public static final double turnKd = 0.0;
-  public static final double turnSimP = 8.0;
+  public static final double turnSimP = 50.0; // TODO: CHANGE BACK to 8 If working on controller
   public static final double turnSimD = 0.0;
   public static final double turnPIDMinInput = 0; // Radians
   public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
@@ -130,4 +130,18 @@ public class DriveConstants {
                   Meters.of(wheelRadiusMeters),
                   KilogramSquareMeters.of(0.02),
                   wheelCOF));
+
+  /**
+   * Gets the module locations of the swerve modules on the robot.
+   *
+   * @return the locations of the swerve modules on the robot, in the order FL, FR, BL, BR
+   */
+  public static Translation2d[] getModuleLocations() {
+    return new Translation2d[] {
+      new Translation2d(trackWidth / 2.0, wheelBase / 2.0), // FL
+      new Translation2d(trackWidth / 2.0, -wheelBase / 2.0), // FR
+      new Translation2d(-trackWidth / 2.0, wheelBase / 2.0), // BL
+      new Translation2d(-trackWidth / 2.0, -wheelBase / 2.0) // BR
+    };
+  }
 }

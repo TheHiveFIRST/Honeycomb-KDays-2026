@@ -10,8 +10,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Inches;
 
 import edu.wpi.first.units.measure.Distance;
-
-// import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -20,7 +19,7 @@ import edu.wpi.first.units.measure.Distance;
  */
 public final class Constants {
   public static final Mode simMode = Mode.SIM; // CHANGE TO .REPLAY FOR FILE
-  public static final Mode currentMode = Mode.SIM; // RobotBase.isReal() ? Mode.REAL : simMode;
+  public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
   // Controller settings
   /** Set to true to use keyboard for simulator input instead of joystick */

@@ -141,12 +141,6 @@ public class Robot extends LoggedRobot {
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
-    // SimulatedArena.getInstance()
-    //     .addGamePieceProjectile(
-    //         ReefscapeCoralOnFly.DropFromCoralStation(
-    //             ReefscapeCoralOnFly.CoralStationsSide.LEFT_STATION,
-    //             DriverStation.Alliance.Red,
-    //             true)); // TODO: change to rebuilt
   }
 
   /** This function is called periodically during test mode. */
@@ -160,8 +154,8 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    // SimulatedArena.getInstance().simulationPeriodic(); // TODO: DO NOT CALL WHEN RUNNING REAL
-    // ROBOT
+    // SimulatedArena.getInstance().simulationPeriodic(); // TODO: DO NOT CALL WHEN RUNNING REAL ROBOT
+
     // robotContainer.updateSimulationToAdvantageScope();
   }
 }

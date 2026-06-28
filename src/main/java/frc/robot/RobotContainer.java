@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
+import frc.robot.subsystems.shooter.*;
+import frc.robot.subsystems.intake.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -37,6 +39,9 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vision;
+  private final Shooter shooter; 
+  private final Intake intake; 
+  private final Pivot pivot; 
   private SwerveDriveSimulation driveSimulation = null;
 
   // Controller
@@ -63,6 +68,10 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(camera0Name, drive::getRotation),
                 new VisionIOLimelight(camera1Name, drive::getRotation));
+        
+        shooter = new Shooter(); 
+        intake = new Intake();
+        pivot = new Pivot();
         break;
 
       case SIM:
@@ -89,6 +98,9 @@ public class RobotContainer {
                     camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose),
                 new VisionIOPhotonVisionSim(
                     camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose));
+        shooter = new Shooter(); //TODO: switch the sim 
+        intake = new Intake();
+        pivot = new Pivot();
         break;
 
       default:
@@ -102,7 +114,9 @@ public class RobotContainer {
                 new ModuleIO() {},
                 (pose) -> {});
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
-
+        shooter = new Shooter(); 
+        intake = new Intake();
+        pivot = new Pivot();
         break;
     }
 

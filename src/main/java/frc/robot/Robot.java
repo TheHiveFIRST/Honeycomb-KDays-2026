@@ -32,7 +32,6 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
   public Robot() {
-    DriverStation.silenceJoystickConnectionWarning(true);
     // Record metadata
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
@@ -50,13 +49,11 @@ public class Robot extends LoggedRobot {
     // Set up data receivers & replay source
     switch (Constants.currentMode) {
       case REAL:
-        // Running on a real robot, try to log to a USB stick ("/U/logs") or fallback
-        Optional<String> writableLogDir = findWritableLogDir();
+        Optional<String> writableLogDir = waitForWritableLogDir(5, 500); // 5 attempts, 500ms apart
         if (writableLogDir.isPresent()) {
           try {
             Logger.addDataReceiver(new WPILOGWriter(writableLogDir.get()));
           } catch (Exception ex) {
-            // Report the actual exception so you can troubleshoot (permissions, filesystem, etc.)
             DriverStation.reportError(
                 "WPILOGWriter failed to start: "
                     + ex.getClass().getSimpleName()
@@ -65,7 +62,6 @@ public class Robot extends LoggedRobot {
                 false);
           }
         } else {
-          // No writable directory found; skip file logging to avoid exceptions
           DriverStation.reportWarning(
               "No writable log directory found; WPILOGWriter disabled.", false);
         }
@@ -92,6 +88,7 @@ public class Robot extends LoggedRobot {
 
     // Start AdvantageKit logger
     Logger.start();
+    DriverStation.silenceJoystickConnectionWarning(true);
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
@@ -119,6 +116,40 @@ public class Robot extends LoggedRobot {
           return Optional.of(f.getAbsolutePath());
         }
       } catch (Exception ignored) {
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Waits for a writable log directory to become available, retrying up to maxAttempts times with
+   * delayMs between each attempt. Handles roboRIO USB mount timing issues on boot.
+   */
+  private Optional<String> waitForWritableLogDir(int maxAttempts, long delayMs) {
+    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+      Optional<String> dir = findWritableLogDir();
+      if (dir.isPresent()) {
+        // Extra check: actually try to create and delete a test file,
+        // since canWrite() can return true on a not-yet-ready FAT32 mount
+        File testFile = new File(dir.get(), ".writetest");
+        try {
+          if (testFile.createNewFile()) {
+            testFile.delete();
+            return dir; // Mount is genuinely ready
+          }
+        } catch (Exception ignored) {
+        }
+      }
+      if (attempt < maxAttempts) {
+        DriverStation.reportWarning(
+            "USB log dir not ready (attempt " + attempt + "/" + maxAttempts + "), retrying...",
+            false);
+        try {
+          Thread.sleep(delayMs);
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+          break;
+        }
       }
     }
     return Optional.empty();

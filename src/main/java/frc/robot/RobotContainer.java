@@ -250,13 +250,13 @@ public class RobotContainer {
 
     // OPERATOR CONTROLS
     operatorController.y().whileTrue(shooter.toggleShooterCommand());
+    operatorController.leftTrigger().onTrue(shooter.toggleKinematicsEstimationCommand());
     operatorController.rightTrigger().onTrue(shooter.setLadderShotCommand());
     operatorController.b().onTrue(shooter.setHubShotCommand());
     operatorController.a().onTrue(shooter.setTrenchShotCommand());
     operatorController.x().onTrue(shooter.toggleDistanceEstimationCommand());
     operatorController.rightBumper().onTrue(shooter.increaseShootingRPMOffsetCommand());
     operatorController.leftBumper().onTrue(shooter.decreaseShootingRPMOffsetCommand());
-    operatorController.leftTrigger().onTrue(shooter.toggleKinematicsEstimationCommand());
   }
 
   /**

@@ -33,6 +33,8 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -66,6 +68,7 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
   private final Consumer<Pose2d> resetSimulationPoseCallBack;
+  private final Field2d field2d = new Field2d();
 
   public Drive(
       GyroIO gyroIO,
@@ -86,6 +89,9 @@ public class Drive extends SubsystemBase {
 
     // Start odometry thread
     SparkOdometryThread.getInstance().start();
+
+    // Publish Field2d for Elastic
+    SmartDashboard.putData("Field", field2d);
 
     // Configure AutoBuilder for PathPlanner
     AutoBuilder.configure(
@@ -177,6 +183,9 @@ public class Drive extends SubsystemBase {
 
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+
+    // Update Field2d for Elastic
+    field2d.setRobotPose(getPose());
   }
 
   /**
